@@ -61,14 +61,15 @@ if __name__ == "__main__":
             found = False
             for category in category_db:
                 for value in category["values"]:
-                    if value in store:
-                        if store not in cost_by_filename[filename][category["name"]]:
-                            cost_by_filename[filename][category["name"]][store] = 0.0
-                        cost_by_filename[filename][category["name"]][store] += cost
-                        found = True
+                    for v in value:
+                        if v in store:
+                            if value[0] not in cost_by_filename[filename][category["name"]]:
+                                cost_by_filename[filename][category["name"]][value[0]] = 0.0
+                            cost_by_filename[filename][category["name"]][value[0]] += cost
+                            found = True
+                            break
+                    if found:
                         break
-                if found:
-                    break
 
             if not found:
                 print(f"{store} {cost} yen is categorized as other")
