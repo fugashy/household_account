@@ -5,10 +5,12 @@ import pandas as pd
 import yaml
 from pprint import pprint
 import matplotlib.pyplot as plt
-import matplotlib
+
+import plot
 
 
 if __name__ == "__main__":
+    # set configulations up
     config_path = argv[1]
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
@@ -16,20 +18,23 @@ if __name__ == "__main__":
     input_filepaths = config["input_filepaths"]
     category_db = config["categories"]
 
+    # construct map for summarize
     cost_by_filename = dict()
     for input_filepath in input_filepaths:
         filename = input_filepath.split('/')[-1].split('.')[0]
         cost_by_filename[filename] = dict()
         for category in category_db:
-            cost_by_filename[filename][category["name"]] = 0.0
-        cost_by_filename[filename]["other"] = 0.0
+            cost_by_filename[filename][category["name"]] = dict()
+        cost_by_filename[filename]["other"] = dict()
 
+    # merge cost that have the same store
     for input_filepath in input_filepaths:
         csv = pd.read_csv(
             input_filepath,
             encoding="shift_jis",
             names=['state', 'date_pay', 'store', 'date_use', 'count', 'num', 'cost', 'unit', 'unit_name', 'rate'])
         filename = input_filepath.split('/')[-1].split('.')[0]
+        print(f"---------- {filename} ----------")
         for row in csv.itertuples():
             try:
                 cost = float(str(row.cost).replace(',', ''))
@@ -42,35 +47,40 @@ if __name__ == "__main__":
             for category in category_db:
                 for value in category["values"]:
                     if value in row.store:
-                        cost_by_filename[filename][category["name"]] += cost
+                        if row.store not in cost_by_filename[filename][category["name"]]:
+                            cost_by_filename[filename][category["name"]][row.store] = 0.0
+                        cost_by_filename[filename][category["name"]][row.store] += cost
                         found = True
                         break
                 if found:
                     break
 
             if not found:
-                print(f"{row.store} is categorized as other")
-                cost_by_filename[filename]["other"] += cost
+                print(f"{row.store} {cost} yen is categorized as other")
+                if row.store not in cost_by_filename[filename]["other"]:
+                    cost_by_filename[filename]["other"][row.store] = 0.0
+                cost_by_filename[filename]["other"][row.store] += cost
 
+    # make campas
+    filenum = len(cost_by_filename.keys())
+    category_num = len(cost_by_filename[list(cost_by_filename.keys())[0]].keys())
 
-    pprint(cost_by_filename)
+    fig = plt.figure(figsize=[10, 2.5 + (2.5 * filenum)])
+    gs = fig.add_gridspec(1 + filenum, category_num)
 
-    fig, ax = plt.subplots(1)
+    # plot sum
+    ax1 = fig.add_subplot(gs[0, :])
+    plot.plot_cost_by_category(ax1, cost_by_filename)
 
-    for i, filename in enumerate(cost_by_filename.keys()):
-        e = cost_by_filename[filename]
-        sum_cost = 0.0
-        costs_to_plot = list()
-        for category in e.keys():
-            sum_cost += e[category]
-            costs_to_plot.append(sum_cost)
+    # plot categories
+    for i, filename in enumerate(sorted(cost_by_filename.keys())):
+        store_value_by_category = cost_by_filename[filename]
+        for j, category in enumerate(sorted(store_value_by_category.keys())):
+            cost_map = store_value_by_category[category]
+            ax = fig.add_subplot(gs[1 + i, j])
+            plot.plot_cost_by_store(ax, category, cost_map)
 
-        tuples = zip(reversed(costs_to_plot), matplotlib.colors.cnames.keys(), reversed(e.keys()))
-        for cost, color, label in tuples:
-            if i == 0:
-                ax.bar(int(filename[2:]), cost, color=color, label=label)
-            else:
-                ax.bar(int(filename[2:]), cost, color=color)
+    plt.subplots_adjust(wspace=0.2, hspace=0.5)
 
-    ax.legend(bbox_to_anchor=(1, 1), loc="upper left")
-    plt.show()
+    fig.savefig("summary.png", dpi=300)
+    print(f"output summary as summary.png")
