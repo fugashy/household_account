@@ -70,12 +70,24 @@ if __name__ == "__main__":
                             break
                     if found:
                         break
+                if found:
+                    break
 
             if not found:
                 print(f"{store} {cost} yen is categorized as other")
                 if store not in cost_by_filename[filename]["other"]:
                     cost_by_filename[filename]["other"][store] = 0.0
                 cost_by_filename[filename]["other"][store] += cost
+
+    # sort by cost
+    for filename in cost_by_filename.keys():
+        cost_by_category = cost_by_filename[filename]
+
+        for category in cost_by_category.keys():
+            cost_by_category[category] = {
+                k: v
+                for k, v in sorted(cost_by_category[category].items(), key=lambda item: item[1])}
+
 
     # make campas
     filenum = len(cost_by_filename.keys())
@@ -89,9 +101,9 @@ if __name__ == "__main__":
     plot.plot_cost_by_category(ax1, cost_by_filename)
 
     # plot categories
-    for i, filename in enumerate(sorted(cost_by_filename.keys())):
+    for i, filename in enumerate(cost_by_filename.keys()):
         store_value_by_category = cost_by_filename[filename]
-        for j, category in enumerate(sorted(store_value_by_category.keys())):
+        for j, category in enumerate(store_value_by_category.keys()):
             cost_map = store_value_by_category[category]
             ax = fig.add_subplot(gs[1 + i, j])
             plot.plot_cost_by_store(ax, category, cost_map)

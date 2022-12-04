@@ -27,7 +27,7 @@ def plot_cost_by_category(ax, cost_map):
 
 
 def plot_cost_by_store(ax, title, cost_map):
-    values = [cost_map[key] for key in cost_map.keys()]
-    labels = cost_map.keys()
+    values = [cost_map[key] for key in reversed(cost_map.keys())]
+    labels = [key for key in reversed(cost_map.keys())]
     ax.pie(values, labels=labels, startangle=90, counterclock=False, textprops={"fontsize": 4})
     ax.set_title(f"{title}:{int(sum(values))}", fontsize=7)
