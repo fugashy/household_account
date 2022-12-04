@@ -8,6 +8,18 @@ import matplotlib.pyplot as plt
 
 import plot
 
+_CSV_COLUMN_NAMES=[
+        'state',
+        'date_pay',
+        'store',
+        'date_use',
+        'count',
+        'num',
+        'cost',
+        'unit',
+        'unit_name',
+        'rate']
+
 
 if __name__ == "__main__":
     # set configulations up
@@ -32,7 +44,7 @@ if __name__ == "__main__":
         csv = pd.read_csv(
             input_filepath,
             encoding="shift_jis",
-            names=['state', 'date_pay', 'store', 'date_use', 'count', 'num', 'cost', 'unit', 'unit_name', 'rate'])
+            names=_CSV_COLUMN_NAMES)
         filename = input_filepath.split('/')[-1].split('.')[0]
         print(f"---------- {filename} ----------")
         for row in csv.itertuples():
@@ -43,23 +55,26 @@ if __name__ == "__main__":
             if math.isnan(cost):
                 continue
 
+            # suppress AP/QP
+            store = row.store.replace("ＡＰ／ＱＰ／", "")
+
             found = False
             for category in category_db:
                 for value in category["values"]:
-                    if value in row.store:
-                        if row.store not in cost_by_filename[filename][category["name"]]:
-                            cost_by_filename[filename][category["name"]][row.store] = 0.0
-                        cost_by_filename[filename][category["name"]][row.store] += cost
+                    if value in store:
+                        if store not in cost_by_filename[filename][category["name"]]:
+                            cost_by_filename[filename][category["name"]][store] = 0.0
+                        cost_by_filename[filename][category["name"]][store] += cost
                         found = True
                         break
                 if found:
                     break
 
             if not found:
-                print(f"{row.store} {cost} yen is categorized as other")
-                if row.store not in cost_by_filename[filename]["other"]:
-                    cost_by_filename[filename]["other"][row.store] = 0.0
-                cost_by_filename[filename]["other"][row.store] += cost
+                print(f"{store} {cost} yen is categorized as other")
+                if store not in cost_by_filename[filename]["other"]:
+                    cost_by_filename[filename]["other"][store] = 0.0
+                cost_by_filename[filename]["other"][store] += cost
 
     # make campas
     filenum = len(cost_by_filename.keys())
