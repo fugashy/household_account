@@ -37,7 +37,7 @@ if __name__ == "__main__":
         cost_by_filename[filename] = dict()
         for category in category_db:
             cost_by_filename[filename][category["name"]] = dict()
-        cost_by_filename[filename]["other"] = dict()
+        cost_by_filename[filename]["その他"] = dict()
 
     # merge cost that have the same store
     for input_filepath in input_filepaths:
@@ -74,10 +74,10 @@ if __name__ == "__main__":
                     break
 
             if not found:
-                print(f"{store} {cost} yen is categorized as other")
-                if store not in cost_by_filename[filename]["other"]:
-                    cost_by_filename[filename]["other"][store] = 0.0
-                cost_by_filename[filename]["other"][store] += cost
+                print(f"{store} {cost} yen is categorized as その他")
+                if store not in cost_by_filename[filename]["その他"]:
+                    cost_by_filename[filename]["その他"][store] = 0.0
+                cost_by_filename[filename]["その他"][store] += cost
 
     # sort by cost
     for filename in cost_by_filename.keys():
