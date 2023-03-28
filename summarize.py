@@ -106,7 +106,7 @@ if __name__ == "__main__":
         for j, category in enumerate(store_value_by_category.keys()):
             cost_map = store_value_by_category[category]
             ax = fig.add_subplot(gs[1 + i, j])
-            plot.plot_cost_by_store(ax, category, cost_map)
+            plot.plot_cost_by_store(ax, f"{filename}の{category}", cost_map)
 
     plt.subplots_adjust(wspace=0.2, hspace=0.5)
 
