@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import matplotlib
 import japanize_matplotlib
+import datetime
 
 
 def plot_cost_by_category(ax, cost_map):
@@ -18,15 +19,15 @@ def plot_cost_by_category(ax, cost_map):
 
         tuples = zip(reversed(costs_to_plot), matplotlib.colors.cnames.keys(), reversed(e.keys()))
         for cost, color, label in tuples:
+            # とりあえず1日を付与
+            date_obj = datetime.datetime(int(filename[:4]), int(filename[4:]), 1).date()
             if i == 0:
-                ax.bar(int(filename[2:]), cost, color=color, label=label)
+                ax.bar(date_obj, cost, width=3.0, color=color, label=label)
             else:
-                ax.bar(int(filename[2:]), cost, color=color)
+                ax.bar(date_obj, cost, width=3.0, color=color)
         ax.text(int(filename[2:]), costs_to_plot[-1] / 2, int(costs_to_plot[-1]), va="center", ha="center")
 
     ax.legend(bbox_to_anchor=(0, 1), loc="lower left", ncol=category_num)
-    xvalues = [int(filename[2:]) for filename in cost_map.keys()]
-    ax.set_xticks(range(min(xvalues), max(xvalues)+1, 1))
 
 
 def plot_cost_by_store(ax, title, cost_map):
