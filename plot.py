@@ -22,11 +22,12 @@ def plot_cost_by_category(ax, cost_map):
             # とりあえず1日を付与
             date_obj = datetime.datetime(int(filename[:4]), int(filename[4:]), 1).date()
             if i == 0:
-                ax.bar(date_obj, cost, width=3.0, color=color, label=label)
+                ax.bar(date_obj, cost, width=3.0, color=color, edgecolor="black", label=label)
             else:
-                ax.bar(date_obj, cost, width=3.0, color=color)
+                ax.bar(date_obj, cost, width=3.0, color=color, edgecolor="black")
         ax.text(int(filename[2:]), costs_to_plot[-1] / 2, int(costs_to_plot[-1]), va="center", ha="center")
 
+    ax.grid()
     ax.legend(bbox_to_anchor=(0, 1), loc="lower left", ncol=category_num)
 
 
