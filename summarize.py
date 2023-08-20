@@ -29,6 +29,7 @@ if __name__ == "__main__":
 
     input_filepaths = config["input_filepaths"]
     category_db = config["categories"]
+    ignore_stores = config["ignore_stores"]
 
     # construct map for summarize
     cost_by_filename = dict()
@@ -57,6 +58,12 @@ if __name__ == "__main__":
 
             # suppress AP/QP
             store = row.store.replace("ＡＰ／ＱＰ／", "")
+            store = store.replace("ＡＰ／", "")
+
+            ignore = False
+            if store in ignore_stores:
+                print(f"ignore {store}")
+                continue
 
             found = False
             for category in category_db:
